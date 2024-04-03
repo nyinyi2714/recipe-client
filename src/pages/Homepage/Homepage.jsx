@@ -11,10 +11,14 @@ function Homepage() {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post('http://test', { text: textInput });
+      const response = await axios.post('http://127.0.0.1:5000/api/input', { 
+        recipe_name: textInput,
+        ingredients: [],
+       });
+
       console.log('Response:', response.data);
       setRecipes(response.data)
-      // Handle success
+
     } catch (error) {
       console.error('Error:', error);
       // Handle error
