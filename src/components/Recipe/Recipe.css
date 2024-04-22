@@ -1,19 +1,26 @@
 .recipe {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
+  display: block;
   width: max-content;
-  border: 1px solid black;
+  max-width: 300px;
+  border: 1px solid var(--light-grey);
+  box-shadow: 0 0 4px var(--light-grey);
   text-align: center;
   border-radius: 5px;
-  gap: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.recipe .content {
+  padding: 1rem;
 }
 
 .recipe h3 {
   text-transform: capitalize;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
 }
 
-.recipe ul {
+.recipe p {
   text-align: left;
 }
 
@@ -21,13 +28,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: 0.3rem;
 }
 
 .tag {
-  padding: 0.2rem 0.5rem 0.3rem;
-  border: 1px solid black;
+  padding: 0.1rem 0.4rem 0.2rem;
+  border: 1px solid;
   margin: 0.5rem 0;
   border-radius: 30px;
   display: flex;
   align-items: center;
+  font-size: 0.85rem;
+  color: var(--primary-color);
 }

@@ -1,30 +1,36 @@
-.login {
+.register {
   padding: 2rem;
 }
 
-.login form {
+.register form {
   max-width: 600px;
   margin: auto;
 }
 
-.login h2 {
+.register .flex-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.register h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
   text-align: center;
 }
 
-.login button {
+.register button {
   width: 100%;
   display: block;
   font-size: 1rem;
-  margin-top: 2rem;
 }
 
-.login p {
+.register p {
   margin: 1rem 0;
 }
 
-.login a {
+.register a {
   color: var(--primary-color);
   text-decoration: underline;
 }

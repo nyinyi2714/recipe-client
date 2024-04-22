@@ -1,18 +1,38 @@
 import { Routes, Route } from 'react-router-dom'
-import Homepage from './pages/Homepage/Homepage'
-import './App.css';
+import { Homepage, Login, Register } from './pages'
+import { Navbar } from './components'
+
+import { ToastContainer, Slide } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import './App.css'
 
 function App() {
   return (
     <div className="App">
+      <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
+
+      <ToastContainer
+        position="top-center"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnHover={false}
+        theme="light"
+        transition={Slide}
+        limit={1}
+      />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
 
 // {
 //   recipes: [ 

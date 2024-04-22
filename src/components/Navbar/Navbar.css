@@ -1,0 +1,9 @@
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-bottom: 1px solid var(--light-grey);
+  box-shadow: 0 0 4px var(--light-grey);
+  overflow: hidden;
+}
