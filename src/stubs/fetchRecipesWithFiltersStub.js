@@ -1,4 +1,4 @@
-export default function fetchRecipesByIngredientsStub(ingredient) {
+export default function fetchRecipesInvalidStub(ingredient, filter) {
 
   return new Promise(resolve => {
     const dummyRecipes = [
@@ -22,7 +22,7 @@ export default function fetchRecipesByIngredientsStub(ingredient) {
     setTimeout(() => resolve({
       success: true,
       error: '',
-      recipes: dummyRecipes
+      recipes: []
     }), 1000) // Simulate async API call delay
   })
 }
