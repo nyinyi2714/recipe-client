@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { Recipe } from '../../components'
 import { GridLoader } from "react-spinners"
+import { useDictionaryAPI } from '../../hooks'
+import { filterRecipesByTags, formatRawIngredientsList, removeFilter } from '../../utils'
 import CloseSvg from '../../assets/x-thin.svg'
 import './Homepage.css'
 
@@ -18,9 +20,11 @@ export default function Homepage() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [searchedIngredients, setSearchedIngredients] = useState([])
+  const [mispelledIngredients, setMispelledIngredients] = useState([])
   const [filters, setFilters] = useState([])
 
   const filterFormRef = useRef()
+  const { checkWord } = useDictionaryAPI()
 
   const handleInputChange = (e) => {
     setErrorMessage('')
@@ -42,23 +46,14 @@ export default function Homepage() {
 
   const handleSearch = async (e) => {
     e.preventDefault()
+    
+    const { 
+      uniqueIngredients, 
+      mispelledIngredients 
+    } = await formatRawIngredientsList(textInput, checkWord)
 
-    const rawIngredientsString = textInput
 
-
-    // split the string into array using "," and trim trailing whitespace 
-    // filter empty ingredients and convert to lowercase for standardized search query
-    let formattedIngredients = rawIngredientsString.split(',')
-      .map(ingredient => ingredient.trim().toLowerCase())
-      .filter(ingredient => ingredient.length > 0)
-
-    // Convert the array to a Set to remove duplicates
-    const uniqueIngredientsSet = new Set(formattedIngredients);
-
-    // If you need to convert the Set back to an array
-    const uniqueIngredientsArray = Array.from(uniqueIngredientsSet);
-
-    if (uniqueIngredientsArray.length <= 0) {
+    if (uniqueIngredients.length <= 0) {
       toast.error("Please type at least 1 valid ingredient.")
       return
     }
@@ -67,20 +62,20 @@ export default function Homepage() {
     setIsLoading(true)
 
     let fetchFunc = fetchRecipesByIngredientsStub
-    if (uniqueIngredientsArray[0] === 'table') fetchFunc = fetchRecipesInvalidStub
-    else if (uniqueIngredientsArray[0] === 'orange') fetchFunc = fetchRecipesNotFoundStub
+    if (uniqueIngredients[0] === 'table') fetchFunc = fetchRecipesInvalidStub
+    else if (uniqueIngredients[0] === 'orange') fetchFunc = fetchRecipesNotFoundStub
 
-    const { success, error, recipes } = await fetchFunc(uniqueIngredientsArray)
+    const { success, error, recipes } = await fetchFunc(uniqueIngredients)
 
     if (!success) {
       setErrorMessage(error)
-      setSearchedIngredients(uniqueIngredientsArray)
+      setSearchedIngredients(uniqueIngredients)
       setIsLoading(false)
       return
     }
 
     setRecipes(recipes)
-    setSearchedIngredients(uniqueIngredientsArray)
+    setSearchedIngredients(uniqueIngredients)
 
     // if filters are applied, filter the recipes list
     if(filters.length > 0) {
@@ -90,6 +85,7 @@ export default function Homepage() {
       setFilteredRecipes(recipes)
     }
 
+    setMispelledIngredients(mispelledIngredients)
     setIsLoading(false)
   }
 
@@ -113,6 +109,7 @@ export default function Homepage() {
     setRecipes([])
     setFilteredRecipes([])
     setSearchedIngredients([])
+    setMispelledIngredients([])
     setTextInput('')
     setErrorMessage('')
     setIsLoading(false)
@@ -126,19 +123,6 @@ export default function Homepage() {
     const filteredSearchedIngredients = searchedIngredients.filter(i => i !== e.target.id)
     setSearchedIngredients(filteredSearchedIngredients)
   }
-
-  // Function to get recipes with tags that include all filters in the filters array
-  const filterRecipesByTags = (recipes, filters) => {
-    return recipes.filter((recipe) => {
-      // Ensure every filter in the filters array is included in the recipe's tags
-      return filters.every((filter) => recipe.tags.includes(filter));
-    });
-  };
-
-  // Function to remove a filter from the filters array
-  const removeFilter = (filters, filterToRemove) => {
-    return filters.filter((filter) => filter !== filterToRemove);
-  };
 
   return (
     <section className='homepage'>
@@ -172,13 +156,19 @@ export default function Homepage() {
             </button>
           </div>
           <div className="searched-ingredients">
-            {searchedIngredients.map((ingredient, index) =>
-              <button type="button" role="button" key={index}>
-                {ingredient}
-                <img onClick={removeSearchedIngredient} id={ingredient} src={CloseSvg} alt="close icon" />
-              </button>
+            {
+              searchedIngredients.map((ingredient, index) =>
+                <button type="button" role="button" key={index}>
+                  {ingredient}
+                  <img onClick={removeSearchedIngredient} id={ingredient} src={CloseSvg} alt="close icon" />
+                </button>
             )}
           </div>
+
+          {
+            mispelledIngredients.length > 0 &&
+            <p className='mispelled-ingredients'>Mispelled Ingredients: {mispelledIngredients.join(', ')}</p>
+          }
 
         </form>
 

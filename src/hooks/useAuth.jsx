@@ -45,23 +45,21 @@ export default function useAuth() {
  * It retrieves an access token upon successful registration and 
  * stores it along with user data in local storage.
  * 
- * @param {string} first_name - The user's first name.
- * @param {string} last_name - The user's last name.
- * @param {string} university - The user's university affiliation (optional).
+ * @param {string} username - The username.
  * @param {string} email - The user's email address.
  * @param {string} password - The user's password.
  * 
  * @return {Promise<boolean>} - A promise that resolves to `true` 
  * if registration is successful, `false` otherwise.
  */
-  async function register({ first_name, last_name, university, email, password }) {
+  async function register({ username, email, password }) {
     try {
       let response = await fetch(`${process.env.REACT_APP_BACKEND_URL}signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ first_name, last_name, university, email, password }),
+        body: JSON.stringify({ username, email, password }),
       })
 
       if (response.ok) {
