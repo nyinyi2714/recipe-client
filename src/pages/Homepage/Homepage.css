@@ -89,7 +89,7 @@
   top: 1px;
 }
 
-.mispelled-ingredients {
+.invalid-ingredients {
   margin: 0.5rem 1rem;
   color: var(--dark-grey);
   font-style: italic;

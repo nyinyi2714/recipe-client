@@ -1,4 +1,6 @@
-export const formatRawIngredientsList = async (rawIngredientsList, checkWord) => {
+export const formatRawIngredientsList = async (rawIngredientsList, isWord, isIngredient) => {
+  console.log(rawIngredientsList)
+
   // split the string into array using "," and trim trailing whitespace 
   // filter empty ingredients and convert to lowercase for standardized search query
   let formattedIngredients = rawIngredientsList.split(',')
@@ -13,14 +15,20 @@ export const formatRawIngredientsList = async (rawIngredientsList, checkWord) =>
 
   let ingredientsList = {
     uniqueIngredients: [],
-    mispelledIngredients: []
+    invalidIngredients: []
   }
 
-  // Filter out mispelled words
+  // Filter out invalid words and invalid ingredients
   for(const i of formattedIngredients) {
-    if(await checkWord(i)) ingredientsList.uniqueIngredients.push(i)
-    else ingredientsList.mispelledIngredients.push(i)
+
+    const isWordFlag = await isWord(i)
+    if(isWordFlag && await isIngredient(i)) {
+      ingredientsList.uniqueIngredients.push(i)
+    }
+    else ingredientsList.invalidIngredients.push(i)
   }
+
+  console.log(ingredientsList)
 
   return ingredientsList
 }

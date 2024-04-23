@@ -1,6 +1,6 @@
 function useDictionaryAPI() {
 
-  const checkWord = async (word) => {
+  const isWord = async (word) => {
     try {
       let response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
       response = await response.json()
@@ -16,7 +16,7 @@ function useDictionaryAPI() {
   }
 
   return{
-    checkWord
+    isWord
   }
 }
 

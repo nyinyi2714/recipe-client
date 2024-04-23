@@ -26,7 +26,7 @@ function App() {
         pauseOnHover={false}
         theme="light"
         transition={Slide}
-        limit={1}
+        limit={10}
       />
     </div>
   )

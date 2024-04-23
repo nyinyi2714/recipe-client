@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Recipe } from '../../components'
 import { GridLoader } from "react-spinners"
-import { useDictionaryAPI } from '../../hooks'
+import { useDictionaryAPI, useSpoonacularAPI } from '../../hooks'
 import { filterRecipesByTags, formatRawIngredientsList, removeFilter } from '../../utils'
 import CloseSvg from '../../assets/x-thin.svg'
 import './Homepage.css'
@@ -18,16 +18,15 @@ export default function Homepage() {
   const [recipes, setRecipes] = useState([])
   const [filteredRecipes, setFilteredRecipes] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
   const [searchedIngredients, setSearchedIngredients] = useState([])
-  const [mispelledIngredients, setMispelledIngredients] = useState([])
+  const [invalidIngredients, setinvalidIngredients] = useState([])
   const [filters, setFilters] = useState([])
 
   const filterFormRef = useRef()
-  const { checkWord } = useDictionaryAPI()
+  const { isWord } = useDictionaryAPI()
+  const { isIngredient } = useSpoonacularAPI()
 
   const handleInputChange = (e) => {
-    setErrorMessage('')
     toast.dismiss()
 
     // Get the raw input
@@ -46,30 +45,29 @@ export default function Homepage() {
 
   const handleSearch = async (e) => {
     e.preventDefault()
-    
-    const { 
-      uniqueIngredients, 
-      mispelledIngredients 
-    } = await formatRawIngredientsList(textInput, checkWord)
+    reset(false)
 
-
-    if (uniqueIngredients.length <= 0) {
-      toast.error("Please type at least 1 valid ingredient.")
+    // Error for empty search input
+    if(textInput.length <= 0) {
+      toast.error('Please Enter an ingredient to search.')
       return
     }
-
-    reset(false)
+    
     setIsLoading(true)
 
+    const { 
+      uniqueIngredients, 
+      invalidIngredients 
+    } = await formatRawIngredientsList(textInput, isWord, isIngredient)
+    
     let fetchFunc = fetchRecipesByIngredientsStub
-    if (uniqueIngredients[0] === 'table') fetchFunc = fetchRecipesInvalidStub
-    else if (uniqueIngredients[0] === 'orange') fetchFunc = fetchRecipesNotFoundStub
+    if (uniqueIngredients[0] === 'orange') fetchFunc = fetchRecipesNotFoundStub
 
     const { success, error, recipes } = await fetchFunc(uniqueIngredients)
 
     if (!success) {
-      setErrorMessage(error)
       setSearchedIngredients(uniqueIngredients)
+      setinvalidIngredients(invalidIngredients)
       setIsLoading(false)
       return
     }
@@ -85,7 +83,7 @@ export default function Homepage() {
       setFilteredRecipes(recipes)
     }
 
-    setMispelledIngredients(mispelledIngredients)
+    setinvalidIngredients(invalidIngredients)
     setIsLoading(false)
   }
 
@@ -109,9 +107,8 @@ export default function Homepage() {
     setRecipes([])
     setFilteredRecipes([])
     setSearchedIngredients([])
-    setMispelledIngredients([])
+    setinvalidIngredients([])
     setTextInput('')
-    setErrorMessage('')
     setIsLoading(false)
     if(isResetFilter) {
       setFilters([])
@@ -144,6 +141,7 @@ export default function Homepage() {
               onChange={handleInputChange}
               className='search'
               placeholder="Enter Ingredients"
+              disabled={isLoading}
             />
             <button name="search" type='submit' className='btn search-btn'>Search</button>
             <button
@@ -166,8 +164,8 @@ export default function Homepage() {
           </div>
 
           {
-            mispelledIngredients.length > 0 &&
-            <p className='mispelled-ingredients'>Mispelled Ingredients: {mispelledIngredients.join(', ')}</p>
+            invalidIngredients.length > 0 &&
+            <p className='invalid-ingredients'>Invalid ingredient{invalidIngredients.length > 1 && 's'}: {invalidIngredients.join(', ')}</p>
           }
 
         </form>
@@ -178,18 +176,23 @@ export default function Homepage() {
             <GridLoader color="#007bff" size={15} margin={2} />
           </div>
         }
-
-        {
-          errorMessage.length > 0 &&
-          <p className='error-message'>{errorMessage}</p>
-        }
-
+  
         {
           recipes.length > 0 && filteredRecipes.length <= 0 &&
-          <p className='error-message'>No recipe found with the current filters.</p>
+          <p className='error-message'>No recipe found with the currently applied filters.</p>
         }
 
-        {!isLoading && recipes.length > 0 &&
+        {
+          searchedIngredients <= 0 && invalidIngredients.length > 0 &&
+          <p className='error-message'>Invalid ingredients list.</p>
+        }
+
+        {
+          !isLoading && recipes.length <= 0 && searchedIngredients.length > 0 &&
+          <p className='error-message'>No recipe found for the entered ingredients list.</p>
+        }
+
+        {!isLoading && recipes.length > 0 && searchedIngredients.length > 0 &&
           <div className='recipes-container'>
             {filteredRecipes.map((recipe, index) => <Recipe recipe={recipe} key={index} />)}
           </div>
